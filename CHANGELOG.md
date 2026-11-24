@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-24
+
 ### Added
 
 - Control of Hisense TVs running VIDAA OS over the local network: power,
@@ -26,4 +28,5 @@ the notes of the version's GitHub Release.
 - Scene actions: press a remote key, open an application.
 - User documentation in English and French.
 
-[Unreleased]: https://github.com/quentinlegay/gladys-vidaatv/commits/main
+[Unreleased]: https://github.com/quentinlegay/gladys-vidaatv/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/quentinlegay/gladys-vidaatv/releases/tag/v0.1.1

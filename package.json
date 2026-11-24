@@ -1,6 +1,6 @@
 {
   "name": "gladys-vidaatv",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Gladys Assistant external integration to control Hisense TVs running VIDAA OS.",
   "type": "module",
