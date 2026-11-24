@@ -1,0 +1,579 @@
+{
+  "manifest_version": 1,
+  "type": "device",
+  "name": "Hisense VIDAA TV",
+  "description": {
+    "en": "Control your Hisense TV running VIDAA OS: power, volume, sources, apps and remote.",
+    "fr": "Pilotez votre TV Hisense sous VIDAA : marche, volume, sources, applis et télécommande."
+  },
+  "version": "0.1.0",
+  "docker_image": "ghcr.io/quentinlegay/gladys-vidaatv:0.1.0",
+  "gladys_version": ">=5.1.0",
+  "cover_image": "https://raw.githubusercontent.com/quentinlegay/gladys-vidaatv/main/cover.png",
+  "categories": ["multimedia"],
+  "network_wake": true,
+  "config_schema": [
+    {
+      "key": "intro",
+      "type": "section",
+      "label": {
+        "en": "Getting started",
+        "fr": "Pour commencer"
+      },
+      "description": {
+        "en": "Gladys talks to the TV over your local network, like the VIDAA mobile app. Give the TV a fixed IP address in your router, fill in its IP and MAC addresses (Settings > Network on the TV), save, then run the \"Start pairing\" action and enter the PIN shown on the TV.",
+        "fr": "Gladys dialogue avec le téléviseur sur votre réseau local, comme l'application mobile VIDAA. Donnez une IP fixe au téléviseur dans votre box, renseignez ses adresses IP et MAC (Paramètres > Réseau sur la TV), enregistrez, puis lancez l'action « Démarrer l'appairage » et saisissez le code affiché sur la TV."
+      },
+      "links": [
+        {
+          "url": "https://github.com/quentinlegay/gladys-vidaatv/blob/main/docs/en.md",
+          "label": {
+            "en": "Documentation",
+            "fr": "Documentation"
+          }
+        }
+      ]
+    },
+    {
+      "key": "tv_host",
+      "type": "string",
+      "label": {
+        "en": "TV IP address",
+        "fr": "Adresse IP du téléviseur"
+      },
+      "placeholder": {
+        "en": "e.g. 192.168.1.50",
+        "fr": "ex. 192.168.1.50"
+      },
+      "required": true
+    },
+    {
+      "key": "tv_mac",
+      "type": "string",
+      "label": {
+        "en": "TV MAC address",
+        "fr": "Adresse MAC du téléviseur"
+      },
+      "description": {
+        "en": "Identifies the TV and turns it on with Wake-on-LAN. Use the address of the interface in use (Wi-Fi or Ethernet).",
+        "fr": "Identifie le téléviseur et l'allume par Wake-on-LAN. Utilisez l'adresse de l'interface utilisée (Wi-Fi ou Ethernet)."
+      },
+      "placeholder": {
+        "en": "e.g. aa:bb:cc:dd:ee:ff",
+        "fr": "ex. aa:bb:cc:dd:ee:ff"
+      },
+      "required": true
+    },
+    {
+      "key": "tv_name",
+      "type": "string",
+      "label": {
+        "en": "TV name",
+        "fr": "Nom du téléviseur"
+      },
+      "required": false,
+      "default": "Hisense TV"
+    },
+    {
+      "key": "advanced",
+      "type": "section",
+      "label": {
+        "en": "Advanced",
+        "fr": "Avancé"
+      },
+      "description": {
+        "en": "Recent VIDAA firmware only accepts the secure connection of the official mobile app: paste its client certificate and private key below (see the documentation). Leave empty if the TV connects without them.",
+        "fr": "Les firmwares VIDAA récents n'acceptent que la connexion sécurisée de l'application mobile officielle : collez ci-dessous son certificat client et sa clé privée (voir la documentation). Laissez vide si le téléviseur se connecte sans."
+      }
+    },
+    {
+      "key": "auth_mode",
+      "type": "select",
+      "label": {
+        "en": "Authentication method",
+        "fr": "Méthode d'authentification"
+      },
+      "description": {
+        "en": "Leave \"Automatic\" unless the TV refuses the connection.",
+        "fr": "Laissez « Automatique » sauf si le téléviseur refuse la connexion."
+      },
+      "required": false,
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": {
+            "en": "Automatic",
+            "fr": "Automatique"
+          }
+        },
+        {
+          "value": "modern",
+          "label": {
+            "en": "Dynamic (recent firmware)",
+            "fr": "Dynamique (firmware récent)"
+          }
+        },
+        {
+          "value": "middle",
+          "label": {
+            "en": "Dynamic (2020-2023 firmware)",
+            "fr": "Dynamique (firmware 2020-2023)"
+          }
+        },
+        {
+          "value": "legacy",
+          "label": {
+            "en": "Dynamic (legacy)",
+            "fr": "Dynamique (ancien)"
+          }
+        },
+        {
+          "value": "static",
+          "label": {
+            "en": "Fixed login (old firmware)",
+            "fr": "Identifiant fixe (ancien firmware)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "client_cert",
+      "type": "secret",
+      "label": {
+        "en": "Client certificate (PEM)",
+        "fr": "Certificat client (PEM)"
+      },
+      "placeholder": {
+        "en": "-----BEGIN CERTIFICATE-----...",
+        "fr": "-----BEGIN CERTIFICATE-----..."
+      },
+      "required": false
+    },
+    {
+      "key": "client_key",
+      "type": "secret",
+      "label": {
+        "en": "Client private key (PEM)",
+        "fr": "Clé privée du client (PEM)"
+      },
+      "placeholder": {
+        "en": "-----BEGIN PRIVATE KEY-----...",
+        "fr": "-----BEGIN PRIVATE KEY-----..."
+      },
+      "required": false
+    },
+    {
+      "key": "wol_broadcast",
+      "type": "string",
+      "label": {
+        "en": "Wake-on-LAN broadcast address",
+        "fr": "Adresse de broadcast Wake-on-LAN"
+      },
+      "description": {
+        "en": "Only if the TV does not turn on: the broadcast address of your network.",
+        "fr": "Uniquement si le téléviseur ne s'allume pas : l'adresse de broadcast de votre réseau."
+      },
+      "placeholder": {
+        "en": "e.g. 192.168.1.255",
+        "fr": "ex. 192.168.1.255"
+      },
+      "required": false
+    }
+  ],
+  "actions": [
+    {
+      "key": "pair_start",
+      "label": {
+        "en": "Start pairing",
+        "fr": "Démarrer l'appairage"
+      },
+      "description": {
+        "en": "Displays a PIN on the TV.",
+        "fr": "Affiche un code sur le téléviseur."
+      },
+      "timeout_seconds": 30
+    },
+    {
+      "key": "pair_confirm",
+      "label": {
+        "en": "Confirm pairing",
+        "fr": "Confirmer l'appairage"
+      },
+      "description": {
+        "en": "Enter the PIN displayed on the TV.",
+        "fr": "Saisissez le code affiché sur le téléviseur."
+      },
+      "timeout_seconds": 30,
+      "fields": [
+        {
+          "key": "pin",
+          "type": "string",
+          "label": {
+            "en": "PIN",
+            "fr": "Code"
+          },
+          "placeholder": {
+            "en": "e.g. 1234",
+            "fr": "ex. 1234"
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "key": "test_connection",
+      "label": {
+        "en": "Test the connection",
+        "fr": "Tester la connexion"
+      },
+      "timeout_seconds": 30
+    },
+    {
+      "key": "reset_pairing",
+      "label": {
+        "en": "Forget the pairing",
+        "fr": "Oublier l'appairage"
+      },
+      "timeout_seconds": 10
+    }
+  ],
+  "scene_actions": [
+    {
+      "key": "send_key",
+      "label": {
+        "en": "Press a TV remote key",
+        "fr": "Appuyer sur une touche de la télécommande"
+      },
+      "description": {
+        "en": "Sends a key of the remote to the Hisense TV.",
+        "fr": "Envoie une touche de la télécommande au téléviseur Hisense."
+      },
+      "timeout_seconds": 30,
+      "fields": [
+        {
+          "key": "key",
+          "type": "select",
+          "label": {
+            "en": "Key",
+            "fr": "Touche"
+          },
+          "required": true,
+          "options": [
+            {
+              "value": "KEY_POWER",
+              "label": {
+                "en": "Power",
+                "fr": "Marche/Arrêt"
+              }
+            },
+            {
+              "value": "KEY_VOLUMEUP",
+              "label": {
+                "en": "Volume up",
+                "fr": "Volume +"
+              }
+            },
+            {
+              "value": "KEY_VOLUMEDOWN",
+              "label": {
+                "en": "Volume down",
+                "fr": "Volume -"
+              }
+            },
+            {
+              "value": "KEY_MUTE",
+              "label": {
+                "en": "Mute",
+                "fr": "Muet"
+              }
+            },
+            {
+              "value": "KEY_CHANNELUP",
+              "label": {
+                "en": "Channel up",
+                "fr": "Chaîne +"
+              }
+            },
+            {
+              "value": "KEY_CHANNELDOWN",
+              "label": {
+                "en": "Channel down",
+                "fr": "Chaîne -"
+              }
+            },
+            {
+              "value": "KEY_UP",
+              "label": {
+                "en": "Up",
+                "fr": "Haut"
+              }
+            },
+            {
+              "value": "KEY_DOWN",
+              "label": {
+                "en": "Down",
+                "fr": "Bas"
+              }
+            },
+            {
+              "value": "KEY_LEFT",
+              "label": {
+                "en": "Left",
+                "fr": "Gauche"
+              }
+            },
+            {
+              "value": "KEY_RIGHT",
+              "label": {
+                "en": "Right",
+                "fr": "Droite"
+              }
+            },
+            {
+              "value": "KEY_OK",
+              "label": {
+                "en": "OK",
+                "fr": "OK"
+              }
+            },
+            {
+              "value": "KEY_RETURNS",
+              "label": {
+                "en": "Back",
+                "fr": "Retour"
+              }
+            },
+            {
+              "value": "KEY_EXIT",
+              "label": {
+                "en": "Exit",
+                "fr": "Quitter"
+              }
+            },
+            {
+              "value": "KEY_HOME",
+              "label": {
+                "en": "Home",
+                "fr": "Accueil"
+              }
+            },
+            {
+              "value": "KEY_MENU",
+              "label": {
+                "en": "Menu",
+                "fr": "Menu"
+              }
+            },
+            {
+              "value": "KEY_INFO",
+              "label": {
+                "en": "Info",
+                "fr": "Info"
+              }
+            },
+            {
+              "value": "KEY_PLAY",
+              "label": {
+                "en": "Play",
+                "fr": "Lecture"
+              }
+            },
+            {
+              "value": "KEY_PAUSE",
+              "label": {
+                "en": "Pause",
+                "fr": "Pause"
+              }
+            },
+            {
+              "value": "KEY_STOP",
+              "label": {
+                "en": "Stop",
+                "fr": "Stop"
+              }
+            },
+            {
+              "value": "KEY_BACK",
+              "label": {
+                "en": "Rewind",
+                "fr": "Retour rapide"
+              }
+            },
+            {
+              "value": "KEY_FORWARDS",
+              "label": {
+                "en": "Fast forward",
+                "fr": "Avance rapide"
+              }
+            },
+            {
+              "value": "KEY_SUBTITLE",
+              "label": {
+                "en": "Subtitles",
+                "fr": "Sous-titres"
+              }
+            },
+            {
+              "value": "KEY_RED",
+              "label": {
+                "en": "Red",
+                "fr": "Rouge"
+              }
+            },
+            {
+              "value": "KEY_GREEN",
+              "label": {
+                "en": "Green",
+                "fr": "Vert"
+              }
+            },
+            {
+              "value": "KEY_YELLOW",
+              "label": {
+                "en": "Yellow",
+                "fr": "Jaune"
+              }
+            },
+            {
+              "value": "KEY_BLUE",
+              "label": {
+                "en": "Blue",
+                "fr": "Bleu"
+              }
+            },
+            {
+              "value": "KEY_0",
+              "label": {
+                "en": "Digit 0",
+                "fr": "Chiffre 0"
+              }
+            },
+            {
+              "value": "KEY_1",
+              "label": {
+                "en": "Digit 1",
+                "fr": "Chiffre 1"
+              }
+            },
+            {
+              "value": "KEY_2",
+              "label": {
+                "en": "Digit 2",
+                "fr": "Chiffre 2"
+              }
+            },
+            {
+              "value": "KEY_3",
+              "label": {
+                "en": "Digit 3",
+                "fr": "Chiffre 3"
+              }
+            },
+            {
+              "value": "KEY_4",
+              "label": {
+                "en": "Digit 4",
+                "fr": "Chiffre 4"
+              }
+            },
+            {
+              "value": "KEY_5",
+              "label": {
+                "en": "Digit 5",
+                "fr": "Chiffre 5"
+              }
+            },
+            {
+              "value": "KEY_6",
+              "label": {
+                "en": "Digit 6",
+                "fr": "Chiffre 6"
+              }
+            },
+            {
+              "value": "KEY_7",
+              "label": {
+                "en": "Digit 7",
+                "fr": "Chiffre 7"
+              }
+            },
+            {
+              "value": "KEY_8",
+              "label": {
+                "en": "Digit 8",
+                "fr": "Chiffre 8"
+              }
+            },
+            {
+              "value": "KEY_9",
+              "label": {
+                "en": "Digit 9",
+                "fr": "Chiffre 9"
+              }
+            }
+          ]
+        },
+        {
+          "key": "repeat",
+          "type": "number",
+          "label": {
+            "en": "Number of presses",
+            "fr": "Nombre d'appuis"
+          },
+          "required": false,
+          "default": 1,
+          "min": 1,
+          "max": 20
+        }
+      ],
+      "outputs": [
+        {
+          "key": "sent",
+          "type": "boolean",
+          "label": {
+            "en": "Key sent",
+            "fr": "Touche envoyée"
+          }
+        }
+      ]
+    },
+    {
+      "key": "launch_app",
+      "label": {
+        "en": "Open a TV application",
+        "fr": "Ouvrir une application TV"
+      },
+      "description": {
+        "en": "Opens an application of the Hisense TV, by its name.",
+        "fr": "Ouvre une application du téléviseur Hisense, par son nom."
+      },
+      "timeout_seconds": 30,
+      "fields": [
+        {
+          "key": "app",
+          "type": "string",
+          "label": {
+            "en": "Application",
+            "fr": "Application"
+          },
+          "placeholder": {
+            "en": "e.g. Netflix",
+            "fr": "ex. Netflix"
+          },
+          "required": true
+        }
+      ],
+      "outputs": [
+        {
+          "key": "app",
+          "type": "string",
+          "label": {
+            "en": "Opened application",
+            "fr": "Application ouverte"
+          }
+        }
+      ]
+    }
+  ]
+}
